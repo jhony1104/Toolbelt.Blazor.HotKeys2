@@ -1,13 +1,5 @@
 ﻿export namespace Toolbelt.Blazor.HotKeys2 {
 
-    const enum Exclude {
-        None = 0,
-        InputText = 0b0001,
-        InputNonText = 0b0010,
-        TextArea = 0b0100,
-        ContentEditable = 0b1000
-    }
-
     const enum ModCodes {
         None = 0,
         Shift = 0x01,
@@ -28,7 +20,7 @@
             public mode: HotKeyMode,
             public modifiers: ModCodes,
             public keyEntry: string,
-            public exclude: Exclude
+            public excludeSelector: string
         ) { }
 
         public action(): void {
@@ -39,9 +31,9 @@
     let idSeq: number = 0;
     const hotKeyEntries = new Map<number, HotkeyEntry>();
 
-    export const register = (dotNetObj: any, mode: HotKeyMode, modifiers: ModCodes, keyEntry: string, exclude: Exclude): number => {
+    export const register = (dotNetObj: any, mode: HotKeyMode, modifiers: ModCodes, keyEntry: string, excludeSelector: string): number => {
         const id = idSeq++;
-        const hotKeyEntry = new HotkeyEntry(dotNetObj, mode, modifiers, keyEntry, exclude);
+        const hotKeyEntry = new HotkeyEntry(dotNetObj, mode, modifiers, keyEntry, excludeSelector);
         hotKeyEntries.set(id, hotKeyEntry);
         return id;
     }
@@ -76,14 +68,14 @@
             const tagName = srcElement.tagName;
             const type = srcElement.getAttribute('type');
 
-            const preventDefault1 = onKeyDown(modifiers, key, code, srcElement, tagName, type);
+            const preventDefault1 = onKeyDown(modifiers, key, code, srcElement);
             const preventDefault2 = isWasm === true ? hotKeysWrpper.invokeMethod(OnKeyDownMethodName, modifiers, tagName, type, key, code) : false;
             if (preventDefault1 || preventDefault2) ev.preventDefault();
             if (isWasm === false) hotKeysWrpper.invokeMethodAsync(OnKeyDownMethodName, modifiers, tagName, type, key, code);
         });
     }
 
-    const onKeyDown = (modifiers: ModCodes, key: string, code: string, srcElement: HTMLElement, tagName: string, type: string | null ): boolean => {
+    const onKeyDown = (modifiers: ModCodes, key: string, code: string, srcElement: HTMLElement ): boolean => {
         let preventDefault = false;
 
         hotKeyEntries.forEach(entry => {
@@ -102,35 +94,13 @@
             if (keyEntry.startsWith("Meta")) entryModKeys |= ModCodes.Meta;
             if (eventModkeys !== entryModKeys) return;
 
-            if (!isAllowedIn(entry, srcElement, tagName, type)) return;
+            if (entry.excludeSelector !== '' && srcElement.matches(entry.excludeSelector)) return;
 
             preventDefault = true;
             entry.action();
         });
 
         return preventDefault;
-    }
-
-    const NonTextInputTypes = ["button", "checkbox", "color", "file", "image", "radio", "range", "reset", "submit",];
-
-    const InputTageName = "INPUT";
-
-    const isAllowedIn = (entry: HotkeyEntry, srcElement: HTMLElement, tagName: string, type: string | null): boolean => {
-
-        if ((entry.exclude & Exclude.InputText) !== 0) {
-            if (tagName === InputTageName && NonTextInputTypes.indexOf(type || '') === -1) return false;
-        }
-        if ((entry.exclude & Exclude.InputNonText) !== 0) {
-            if (tagName === InputTageName && NonTextInputTypes.indexOf(type || '') !== -1) return false;
-        }
-        if ((entry.exclude & Exclude.TextArea) !== 0) {
-            if (tagName === "TEXTAREA") return false;
-        }
-        if ((entry.exclude & Exclude.ContentEditable) !== 0) {
-            if (srcElement.contentEditable === "true") return false;
-        }
-
-        return true;
     }
 
 }

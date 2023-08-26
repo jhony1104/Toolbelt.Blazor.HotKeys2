@@ -42,10 +42,10 @@
     protected override void OnInitialized()
     {
         HotKeysContext = HotKeys.CreateContext()
-        .Add(Key.Question, () => SetHotkeysCheatSheetVisible(!this.HotKeysCheatSheetVisible), "", Exclude.InputNonText | Exclude.TextArea) // Open/Close the Hot keys cheat sheet.
-        .Add(Key.Escape, () => SetHotkeysCheatSheetVisible(false), "", Exclude.InputNonText | Exclude.TextArea) // Close the Hot keys cheat sheet.
-        .Add(Code.H, () => GoTo("/"), "Go to Home page.", Exclude.TextArea | Exclude.ContentEditable)
-        .Add(Code.C, () => GoTo("/counter"), "Go to Counter page.", Exclude.InputText | Exclude.TextArea)
+        .Add(Key.Question, () => SetHotkeysCheatSheetVisible(!this.HotKeysCheatSheetVisible), "", "input[type = button], input[type = checkbox], input[type = color], input[type = file], input[type = image], input[type = radio], input[type = range], input[type = reset], input[type = submit], textarea") // Open/Close the Hot keys cheat sheet.
+        .Add(Key.Escape, () => SetHotkeysCheatSheetVisible(false), "", "input[type=button], input[type=checkbox], input[type=color], input[type=file], input[type=image], input[type=radio], input[type=range], input[type=reset], input[type=submit],  textarea") // Close the Hot keys cheat sheet.
+        .Add(Code.H, () => GoTo("/"), "Go to Home page.", "textarea, [contenteditable]:not(contenteditable=false)")
+        .Add(Code.C, () => GoTo("/counter"), "Go to Counter page.", "input[type=date], input[type=datetime-local], input[type=email], input[type=hidden], input[type=month], input[type=number], input[type=password], input[type=search], input[type=tel], input[type=text], input[type=time], input[type=url], input[type=week], textarea")
         .Add(Code.F, () => GoTo("/fetchdata"), "Go to Fetch data page.")
         .Add(Key.Control, OnCtrlKeyDown, "Double tap to go to Home.");
     }

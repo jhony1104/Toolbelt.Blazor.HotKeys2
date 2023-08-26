@@ -21,7 +21,7 @@ public partial class SaveText : IDisposable
     protected override void OnInitialized()
     {
         this.HotKeysContext = this.HotKeys.CreateContext()
-            .Add(ModCode.Ctrl, Code.S, this.OnSaveText, exclude: Exclude.TextArea);
+            .Add(ModCode.Ctrl, Code.S, this.OnSaveText, excludeSelector: "textarea");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
